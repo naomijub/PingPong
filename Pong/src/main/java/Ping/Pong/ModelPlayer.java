@@ -1,5 +1,11 @@
 package Ping.Pong;
 
-public class ModelPlayer {
+public class ModelPlayer extends Model {
+	
+	public ModelPlayer(){
+		super();
+		
+	}
+	
 
 }

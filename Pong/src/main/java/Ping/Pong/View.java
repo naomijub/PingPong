@@ -5,9 +5,12 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Random;
 
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 public class View extends JPanel {
 
@@ -18,10 +21,12 @@ public class View extends JPanel {
 	//Positions
 	private int ballx, bally, p1x, p1y, p2x, p2y,
 	//scores and ball direction
-				score1, score2;//, ballDx, ballDy;
+				score1, score2, ballDx, ballDy;
 	
 	//wins who gets to ten
-	private boolean p1Win, p2Win;
+	private boolean p1Win, p2Win, reflect;
+	
+	private Timer timer;
 	
 	private final int[] map = {
 			5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9,
@@ -63,11 +68,10 @@ public class View extends JPanel {
 
         initVar();
         initGame();
+        timer.start();
 	}
 	
 	private void initVar(){
-		ballx  = 24;
-		bally  = 14;
 		p1x    = 1;
 		p1y    = 14;
 		p2x	   = 48;
@@ -76,13 +80,22 @@ public class View extends JPanel {
 		score2 = 0;
 		p1Win  = false;
 		p2Win  = false;
+		reflect = false;
+		
+		timer = new Timer(5, new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				repaint();
+			}
+		});
 		
 	}
 	
 	private void initGame(){
 		Random rg = new Random();
-		//ballDx = ((rg.nextInt(131) % 2) * 2) - 1 ;
-		//ballDy = ((rg.nextInt(101) % 2) * 2) - ((rg.nextInt(17) % 7) - 3) ;
+		ballDx = ((rg.nextInt(131) % 2) * 2) - 1;
+		ballDy = ((rg.nextInt(101) % 2) * 2) - ((rg.nextInt(17) % 7) - 3);
+		ballx  = 480;
+		bally  = 280;
 	}
 	
 	@Override
@@ -102,16 +115,17 @@ public class View extends JPanel {
 		
 		drawMap(g2d);
 		
-		if(!p1Win || !p2Win){
-			drawScore(g2d);
-			playGame(g2d);
-		}else{
+		if(p1Win || p2Win){
 			if(p1Win){
 				drawP1Win(g2d);
 			}
 			if(p2Win){
 				drawP2Win(g2d);
 			}
+		}else{
+			drawScore(g2d);
+			playGame(g2d);
+			
 		}
 	}
 	
@@ -159,7 +173,7 @@ public class View extends JPanel {
         //score string
         g2d.setColor(Color.WHITE);
         g2d.setFont(font);
-        g2d.drawString(str, 100, BOARD_HEIGHT + 30);
+        g2d.drawString(str, 100, BOARD_HEIGHT + 50);
 	}
 	
 	public void drawP1Win(Graphics2D g2d){
@@ -174,7 +188,7 @@ public class View extends JPanel {
         //score string
         g2d.setColor(Color.WHITE);
         g2d.setFont(font);
-        g2d.drawString(str, 100, BOARD_HEIGHT + 30);
+        g2d.drawString(str, 100, BOARD_HEIGHT + 50);
 	}
 	
 	public void drawP2Win(Graphics2D g2d){
@@ -189,13 +203,61 @@ public class View extends JPanel {
         //score string
         g2d.setColor(Color.WHITE);
         g2d.setFont(font);
-        g2d.drawString(str, 100, BOARD_HEIGHT + 30);
+        g2d.drawString(str, 100, BOARD_HEIGHT + 50);
 	}
 	
 	public void playGame(Graphics2D g2d){
 		drawPlay1(g2d);
 		drawPlay2(g2d);
+		moveBall(g2d);
+		testKeeperGoal();
+		testWin();
+	}
+	
+	public void moveBall(Graphics2D g2d){
+		int auxX = ballx + ballDx;
+		int auxY = bally + ballDy;
+		
+		checkReflect();
+		
+		if(!reflect){
+			if(auxY > 5 && auxY < 595){
+				bally = auxY;
+				ballx = auxX;
+			}else{
+				ballDy = -ballDy;
+				bally = bally + ballDy;
+				ballx = auxX;
+			}
+		}else{
+			if(auxY > 5 && auxY < 595){
+				ballDx = -ballDx;
+				bally = auxY;
+				ballx = ballx + ballDx;
+				reflect = false;
+			}else{
+				ballDy = -ballDy;
+				ballDx = -ballDx;
+				bally = bally + ballDy;
+				ballx = ballx + ballDx;
+				reflect = false;
+			}
+		}
 		drawBall(g2d);
+		
+	}
+	
+	public void checkReflect(){
+		if(ballx == 50){
+			if((bally >= p1y * TILE_SIZE) && (bally <= (p1y + 8) * TILE_SIZE )){
+				reflect = true;}
+
+		}
+		if(ballx == 950){
+			if((bally >= p2y * TILE_SIZE) && (bally <= (p2y + 8) * TILE_SIZE )){
+				reflect = true;}
+		
+		}
 	}
 	
 	public void drawPlay1(Graphics2D g2d){
@@ -216,16 +278,56 @@ public class View extends JPanel {
 	
 	public void drawBall(Graphics2D g2d){
 		g2d.setColor(new Color(15, 240, 20));
-		g2d.drawRoundRect(ballx * TILE_SIZE, bally * TILE_SIZE, 
+		g2d.drawRoundRect(ballx, bally, 
 				TILE_SIZE, TILE_SIZE, 90, 90);
-		g2d.fillRoundRect(ballx * TILE_SIZE, bally * TILE_SIZE, 
+		g2d.fillRoundRect(ballx, bally, 
 				TILE_SIZE, TILE_SIZE, 90, 90);
 	}
 	
 	public void update(){
 		repaint();
 	}
+	
+	public void testKeeperGoal(){
+		
+		if(ballx == 40){
+			if((bally > p1y * TILE_SIZE) && (bally > (p1y + 8) * TILE_SIZE)){
+				reflect = true;
+			}else{
+				if(ballx == 5){
+					score2++;
+					initGame();
+				}
+			}
+		}else{
+			if(ballx == 959){
+				if((bally > p2y * TILE_SIZE) && (bally > (p2y + 8) * TILE_SIZE)){
+					reflect = true;
+				}else{
+					if(ballx == 995){
+						score1++;
+						initGame();
+					}
+				}
+			}else{
+				if(ballx == 5){
+					score2++;
+					initGame();
+				}
+				if(ballx == 995){
+					score1++;
+					initGame();
+				}
+			}
+		}
+		
+	}
 
+	public void testWin(){
+		if(score1 == 10){ p1Win = true;}
+		if(score2 == 10){ p2Win = true;}
+	}
+	
 	public int getBallx() {
 		return ballx;
 	}
@@ -306,6 +408,36 @@ public class View extends JPanel {
 		this.p2Win = p2Win;
 	}
 	
-	
+	public int getBallDx() {
+		return ballDx;
+	}
+
+	public void setBallDx(int ballDx) {
+		this.ballDx = ballDx;
+	}
+
+	public int getBallDy() {
+		return ballDy;
+	}
+
+	public void setBallDy(int ballDy) {
+		this.ballDy = ballDy;
+	}
+
+	public int[] getMap() {
+		return map;
+	}
+
+	public boolean isReflect() {
+		return reflect;
+	}
+
+	public void setReflect(boolean reflect) {
+		this.reflect = reflect;
+	}
+
+	void addKeyListener(ActionListener e){
+		addKeyListener(e);
+	}
 	
 }

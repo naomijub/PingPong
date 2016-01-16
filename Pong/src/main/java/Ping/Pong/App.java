@@ -26,10 +26,9 @@ public class App extends JFrame
 	
 	public void initUI(){
 		View      	board 	= new View();
-        ModelBall 	ball  	= new ModelBall();
         ModelPlayer p1 		= new ModelPlayer();
         ModelPlayer p2 		= new ModelPlayer();
-        Controller 	control = new Controller(board, ball, p1, p2);
+        Controller 	control = new Controller(board, p1, p2);
         
         setSize(1010, 700);
         setResizable(false);
