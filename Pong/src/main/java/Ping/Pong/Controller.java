@@ -5,13 +5,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.Timer;
+
 public class Controller {
 	
 	private View board;
 	private ModelPlayer p1, p2;
+	private Timer timer;
 	
 	public Controller(View board,
-							ModelPlayer p1, ModelPlayer p2){
+							 ModelPlayer p1,  ModelPlayer p2){
 		
 		this.board = board;
 		this.p1    = p1;
@@ -28,7 +31,6 @@ public class Controller {
 		p1.setY(board.getP1y());
 		p2.setX(board.getP2x());
 		p2.setY(board.getP2y());
-		
 	}
 	
 	public void updateValues(){
@@ -36,7 +38,6 @@ public class Controller {
 		board.setP1y(p1.getY());
 		board.setP2x(p2.getX());
 		board.setP2y(p2.getY());
-
 	}
 
 	

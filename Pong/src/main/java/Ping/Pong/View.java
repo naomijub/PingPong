@@ -93,7 +93,7 @@ public class View extends JPanel {
 	private void initGame(){
 		Random rg = new Random();
 		ballDx = ((rg.nextInt(131) % 2) * 2) - 1;
-		ballDy = ((rg.nextInt(101) % 2) * 2) - ((rg.nextInt(17) % 7) - 3);
+		ballDy = ((rg.nextInt(171) % 7) - 3);
 		ballx  = 480;
 		bally  = 280;
 	}
@@ -209,16 +209,17 @@ public class View extends JPanel {
 	public void playGame(Graphics2D g2d){
 		drawPlay1(g2d);
 		drawPlay2(g2d);
-		moveBall(g2d);
 		testKeeperGoal();
+		moveBall(g2d);
 		testWin();
 	}
 	
+	//For performance reasons, this is not included in Model.
 	public void moveBall(Graphics2D g2d){
 		int auxX = ballx + ballDx;
 		int auxY = bally + ballDy;
 		
-		checkReflect();
+		//checkReflect();
 		
 		if(!reflect){
 			if(auxY > 5 && auxY < 595){
@@ -245,19 +246,6 @@ public class View extends JPanel {
 		}
 		drawBall(g2d);
 		
-	}
-	
-	public void checkReflect(){
-		if(ballx == 50){
-			if((bally >= p1y * TILE_SIZE) && (bally <= (p1y + 8) * TILE_SIZE )){
-				reflect = true;}
-
-		}
-		if(ballx == 950){
-			if((bally >= p2y * TILE_SIZE) && (bally <= (p2y + 8) * TILE_SIZE )){
-				reflect = true;}
-		
-		}
 	}
 	
 	public void drawPlay1(Graphics2D g2d){
@@ -290,31 +278,34 @@ public class View extends JPanel {
 	
 	public void testKeeperGoal(){
 		
-		if(ballx == 40){
-			if((bally > p1y * TILE_SIZE) && (bally > (p1y + 8) * TILE_SIZE)){
+		if(ballx == 50){
+			if((bally >= (p1y * TILE_SIZE) - 10) && (bally <= ((p1y + 8) * TILE_SIZE) + 10)){
 				reflect = true;
 			}else{
-				if(ballx == 5){
+				reflect = false;
+				if(ballx <= 5){
 					score2++;
 					initGame();
 				}
 			}
 		}else{
-			if(ballx == 959){
-				if((bally > p2y * TILE_SIZE) && (bally > (p2y + 8) * TILE_SIZE)){
+			if(ballx == 950){
+				if((bally >= (p2y * TILE_SIZE) - 10) && (bally <= ((p2y + 8) * TILE_SIZE) + 10)){
 					reflect = true;
 				}else{
-					if(ballx == 995){
+					reflect = false;
+					if(ballx >= 995){
 						score1++;
 						initGame();
 					}
 				}
 			}else{
-				if(ballx == 5){
+				reflect = false;
+				if(ballx == 0){
 					score2++;
 					initGame();
 				}
-				if(ballx == 995){
+				if(ballx == 999){
 					score1++;
 					initGame();
 				}
